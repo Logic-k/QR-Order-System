@@ -1,13 +1,19 @@
-from flask import Flask, request, jsonify, render_template_string
+import os
+import json
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-app = Flask(__name__)
+# Render 환경 변수에서 Firebase JSON 키 가져오기
+firebase_credentials = os.getenv("FIREBASE_CREDENTIALS")
 
-# Firebase 연결
-cred = credentials.Certificate("test-a829c-firebase-adminsdk-fbsvc-b0d1a4414c.json")
-firebase_admin.initialize_app(cred)
-db = firestore.client()
+if firebase_credentials:
+    firebase_credentials_dict = json.loads(firebase_credentials)  # JSON 문자열을 Python 딕셔너리로 변환
+    cred = credentials.Certificate(firebase_credentials_dict)  # Firebase 인증 객체 생성
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
+    print("✅ Firebase 연결 완료!")
+else:
+    print("❌ Firebase 환경 변수를 찾을 수 없습니다.")
 
 # 주문 페이지 (QR 코드로 이동)
 @app.route("/order", methods=["GET", "POST"])
